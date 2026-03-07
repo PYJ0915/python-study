@@ -37,7 +37,8 @@ print("단어 빈도수 내림차순 출력")
 for k, v in sorted(count.items(), key=lambda x: x[1], reverse=(True)) :
   print(k, ":", v)
 
-# 가장 많이 등장한 문자
-print("가장 많이 등장한 문자 : ", max(Counter(sentence).values()))
+# 가장 많이 등장한 문자 (공백 제거 포함! -> 공백이 나올 가능성 O)
+print("가장 많이 등장한 문자 : ", Counter(sentence.replace(" ", "")).most_common(1)[0][0])
 
-# 문자 빈도수 상위 3개 출력
+# 문자 빈도수 상위 3개 출력 (공백 제거 포함! -> 공백이 나올 가능성 O)
+print("문자 빈도수 상위 3개 : ", Counter(sentence.replace(" ", "")).most_common(3))

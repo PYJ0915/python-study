@@ -56,11 +56,11 @@ count = Counter(nums)
 print([k for k, v in count.items() if v != 1])
 
 # 오답 정리
-# ❌ 틀린 코드
+# 틀린 코드
 print(k for k, v in count.items() if v != 1)
 # generator object <genexpr> at 0x... 출력
 
-# ✅ 리스트 컴프리헨션
+# 리스트 컴프리헨션
 print([k for k, v in count.items() if v != 1])
 # [2, 3]
 
