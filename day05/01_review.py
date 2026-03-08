@@ -64,7 +64,7 @@ print(k for k, v in count.items() if v != 1)
 print([k for k, v in count.items() if v != 1])
 # [2, 3]
 
-[x for x in nums]   # [] → 리스트 컴프리헨션 ✅
+[x for x in nums]   # [] → 리스트 컴프리헨션
 (x for x in nums)   # () → 제너레이터 (지금 단계에선 안 씀)
 {x for x in nums}   # {} → 셋 컴프리헨션
 
