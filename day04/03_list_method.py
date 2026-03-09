@@ -20,22 +20,22 @@ print(nums) # [1,3]
 # remove() — 특정값 제거
 nums = [1,2,3,2]
 nums.remove(2)
-print(nums)
+print(nums) # [1, 3, 2] <- 앞에 있는 특정값만 제거
 
-# index(x) — x의 인덱스 반환
+# index(x) — x값의 인덱스 반환
 nums = [10,20,30]
 print(nums.index(20)) # 1
 
-# count(x) — x의 개수 세기
+# count(x) — x값의 개수 세기
 nums = [1,2,2,3]
 print(nums.count(2)) # 2
 
-# sort() — 리스트 정렬
+# sort() — 리스트 정렬 => 원본 변경 O
 nums = [3,1,2]
 nums.sort()
 print(nums) # [1, 2, 3]
 
-# sorted() — 정렬된 새 리스트
+# sorted() — 정렬된 새 리스트 => 원본 변경 X
 nums = [3,1,2]
 print(sorted(nums)) # [1, 2, 3]
 
