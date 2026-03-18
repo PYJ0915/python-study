@@ -1,0 +1,39 @@
+# 가상환경
+venv/
+.venv/
+env/
+
+# 파이썬 캐시
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+# 빌드 / 배포
+build/
+dist/
+*.egg-info/
+*.egg
+
+# 환경변수
+.env
+.env.local
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# 테스트 / 커버리지
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 데이터 파일 (필요하면 주석 해제)
+# *.csv
+# *.xlsx
+# *.json
+
+# OS
+.DS_Store        # Mac
+Thumbs.db        # Windows
+desktop.ini      # Windows
