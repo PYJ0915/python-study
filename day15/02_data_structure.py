@@ -36,8 +36,8 @@ from collections import deque
 queue = deque() # 리스트 대신 deque 사용
 
 queue.append(1) # enqueue [1]
-queue.append(1) # enqueue [1, 2]
-queue.append(1) # enqueue [1, 2, 3]
+queue.append(2) # enqueue [1, 2]
+queue.append(3) # enqueue [1, 2, 3]
 
 queue.popleft() # dequeue → 1  [2, 3]
 queue.popleft() # dequeue → 2  [3]
