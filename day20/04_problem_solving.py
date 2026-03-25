@@ -79,6 +79,7 @@ print(df["score"].min())
 df["pass/fail"] = np.where(df["score"] >= 90, "pass", "fail")
 print(df)
 
+
 # 문제 5 - 아래 조건으로 데이터를 분석
 # 위 data 에서
 
@@ -90,6 +91,70 @@ print(df.groupby("dept")["name"].count())
 
 # 3. score 상위 3명 이름 출력
 print(df.sort_values("score", ascending=False).head(3))
+
+
+# 문제 6 - 아래 데이터로 groupby 분석
+df = pd.DataFrame({
+    "name":   ["Tom", "Jane", "Mike", "Anna", "John", "Lisa"],
+    "dept":   ["A", "B", "A", "B", "A", "B"],
+    "score":  [85, 92, 78, 95, 88, 73],
+    "gender": ["M", "F", "M", "F", "M", "F"]
+})
+
+# 1. dept 별 평균, 최고점, 최저점, 인원수
+print(df.groupby("dept")["score"].agg(["mean", "max", "min", "count"]))
+
+# 2. dept + gender 별 평균 score
+print(df.groupby(["dept", "gender"])["score"].mean())
+
+# 3. 전체 평균보다 높은 dept 만 출력
+print(df["dept"][df["score"] > df["score"].mean()])
+
+
+# 문제 7 - 아래 두 테이블을 merge
+students = pd.DataFrame({
+    "id":   [1, 2, 3, 4],
+    "name": ["Tom", "Jane", "Mike", "Anna"]
+})
+
+scores = pd.DataFrame({
+    "id":    [1, 2, 3, 5],
+    "score": [85, 92, 78, 90]
+})
+
+# 1. inner join
+print(pd.merge(students, scores, on="id"))
+
+# 2. left join
+left_join = pd.merge(students, scores, on="id", how="left")
+
+# 3. 합친 결과에서 score 가 없는 학생 이름 출력
+print(left_join[left_join["score"].isnull()]["name"])
+
+
+# 문제 8 - apply 로 아래 컬럼을 추가
+# df 에서
+# 1. score 가 90 이상 → "A"
+#           80 이상 → "B"
+#           70 이상 → "C"
+#           나머지  → "D"
+df["grade"] = df["score"].apply(lambda x:
+  "A" if x >= 90 else
+  "B" if x >= 80 else
+  "C" if x >= 70 else
+  "D"
+)
+
+print(df)
+
+
+# 2. "이름(부서): 점수점" 형식의 summary 컬럼 추가
+df["summary"] = df.apply(
+  lambda row : f"{row['name']}({row['dept']}): {row['score']}점",
+  axis=1
+)
+
+print(df)
 
 
 # 개선된 풀이
@@ -108,7 +173,6 @@ print(arr1[arr1 < 10])
 # 한 번에
 print(arr[(arr > 3) & (arr < 10)])   # ✅ & 로 조건 합치기
 
-
 # 문제 5 - 이름만 출력
 # 지금 코드 — 전체 행 출력
 print(df.sort_values("score", ascending=False).head(3))
@@ -116,5 +180,18 @@ print(df.sort_values("score", ascending=False).head(3))
 # 이름만 출력
 print(df.sort_values("score", ascending=False).head(3)["name"].values)
 # ['Anna' 'Jane' 'John']
+
+# 문제 6 - 의도 파악
+# 지금 코드 — score 가 평균보다 높은 행의 dept 출력
+print(df["dept"][df["score"] > df["score"].mean()])
+# 0    A
+# 1    B
+# 4    A
+
+# 문제 의도는 dept 별 평균이 전체 평균보다 높은 dept
+dept_mean = df.groupby("dept")["score"].mean()
+total_mean = df["score"].mean()
+print(dept_mean[dept_mean > total_mean].index.tolist())
+# ['B']  ← B부서 평균(86.67) > 전체 평균(85.17)
 
 

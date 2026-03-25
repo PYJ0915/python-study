@@ -1,4 +1,4 @@
-# 📚 Day 20 파이썬 심화 — numpy + pandas 기초
+# 📚 Day 20 파이썬 심화 — numpy + pandas 기초 & 심화
 
 ---
 
@@ -23,13 +23,13 @@ import numpy as np
 arr = np.array([1, 2, 3, 4, 5])
 
 # numpy 스타일 생성 (더 간결)
-np.arange(1, 21)             # 1~20 배열 ✅
-np.zeros(5)                  # [0. 0. 0. 0. 0.]
-np.ones(5)                   # [1. 1. 1. 1. 1.]
-np.arange(0, 10, 2)          # [0 2 4 6 8]
-np.linspace(0, 1, 5)         # [0. 0.25 0.5 0.75 1.]
+np.arange(1, 21)                  # 1~20 배열 ✅
+np.zeros(5)                       # [0. 0. 0. 0. 0.]
+np.ones(5)                        # [1. 1. 1. 1. 1.]
+np.arange(0, 10, 2)               # [0 2 4 6 8]
+np.linspace(0, 1, 5)              # [0. 0.25 0.5 0.75 1.]
 np.random.randint(0, 10, size=5)  # 랜덤 정수 5개
-np.random.rand(3, 3)         # 0~1 랜덤 3x3 배열
+np.random.rand(3, 3)              # 0~1 랜덤 3x3 배열
 
 # 2차원 배열
 arr2d = np.array([[1, 2, 3],
@@ -103,7 +103,7 @@ a + b                    # [5 7 9]             ← 원소별 덧셈
 ```python
 arr = np.array([1, 2, 3, 4, 5])
 
-arr + 10     # [11 12 13 14 15] ← 전체에 10 더함
+arr + 10     # [11 12 13 14 15]
 arr * 2      # [2 4 6 8 10]
 arr > 3      # [False False False True True]
 ```
@@ -113,7 +113,7 @@ arr > 3      # [False False False True True]
 ## 7️⃣ 통계 함수
 
 ```python
-arr = np.array([85, 92, 78, 95, 88, 73, 90, 82])
+arr = np.array([85, 92, 78, 95, 88])
 
 np.sum(arr)      # 합계
 np.mean(arr)     # 평균
@@ -136,14 +136,14 @@ np.sum(arr2d, axis=1)   # [6 15]   ← 행 기준
 arr = np.array([1, 2, 3, 4, 5, 6])
 
 # 단일 조건
-arr[arr > 3]              # [4 5 6]
+arr[arr > 3]                      # [4 5 6]
 
 # 복합 조건 — & 로 한 번에
-arr[(arr > 3) & (arr < 6)]   # [4 5] ✅
+arr[(arr > 3) & (arr < 6)]        # [4 5] ✅
 
 # where — 조건에 따라 값 선택
-np.where(arr > 3, arr, 0)    # [0 0 0 4 5 6]
-np.where(arr >= 90, "A", "B")  # 성적 변환에 활용
+np.where(arr > 3, arr, 0)         # [0 0 0 4 5 6]
+np.where(arr >= 90, "A", "B")     # 성적 변환에 활용
 ```
 
 ---
@@ -161,7 +161,7 @@ arr2d.T              # 전치 (행열 바꾸기)
 
 ---
 
-# 2부 — pandas
+# 2부 — pandas 기초
 
 ## 1️⃣ pandas란?
 
@@ -272,10 +272,6 @@ df["score"].max()
 df["score"].min()
 df["score"].count()
 df["grade"].value_counts()   # 빈도수
-
-# groupby
-df.groupby("dept")["score"].mean()    # dept 별 평균
-df.groupby("dept")["name"].count()    # dept 별 학생 수
 ```
 
 ---
@@ -289,13 +285,139 @@ df.to_csv("output.csv", index=False)   # index=False → 인덱스 제외
 
 ---
 
+# 3부 — pandas 심화
+
+## 1️⃣ groupby 심화
+
+```python
+# 기본 groupby
+df.groupby("dept")["score"].mean()
+
+# 여러 집계 함수 한 번에 — agg()
+df.groupby("dept")["score"].agg(["mean", "max", "min", "count"])
+
+# 여러 컬럼 groupby
+df.groupby(["dept", "gender"])["score"].mean()
+
+# dept 별 평균이 전체 평균보다 높은 dept
+dept_mean  = df.groupby("dept")["score"].mean()
+total_mean = df["score"].mean()
+dept_mean[dept_mean > total_mean].index.tolist()
+```
+
+---
+
+## 2️⃣ merge (테이블 합치기)
+
+```python
+# SQL JOIN 과 동일한 개념
+
+# inner join — 양쪽 다 있는 것만
+pd.merge(students, scores, on="id")
+
+# left join — 왼쪽 전부 (오른쪽 없으면 NaN)
+pd.merge(students, scores, on="id", how="left")
+
+# right join / outer join
+pd.merge(students, scores, on="id", how="right")
+pd.merge(students, scores, on="id", how="outer")
+
+# score 가 없는 학생 이름 출력
+left_join = pd.merge(students, scores, on="id", how="left")
+left_join[left_join["score"].isnull()]["name"]
+```
+
+---
+
+## 3️⃣ pivot_table
+
+```python
+pd.pivot_table(
+    df,
+    values="score",      # 집계할 값
+    index="dept",        # 행 기준
+    columns="gender",    # 열 기준
+    aggfunc="mean"       # 집계 함수
+)
+```
+
+---
+
+## 4️⃣ apply 심화
+
+```python
+# 단일 컬럼 — 다중 조건
+df["grade"] = df["score"].apply(lambda x:
+    "A" if x >= 90 else
+    "B" if x >= 80 else
+    "C" if x >= 70 else
+    "D"
+)
+
+# 여러 컬럼 동시 활용 — axis=1
+df["summary"] = df.apply(
+    lambda row: f"{row['name']}({row['dept']}): {row['score']}점",
+    axis=1
+)
+```
+
+---
+
+## 5️⃣ 문자열 처리 — str accessor
+
+```python
+df["name"].str.strip()          # 공백 제거
+df["name"].str.lower()          # 소문자
+df["name"].str.upper()          # 대문자
+df["name"].str.contains("a")    # 포함 여부
+df["name"].str.startswith("T")  # 시작 여부
+df["name"].str.len()            # 문자열 길이
+df["name"].str.replace("T", "t")
+```
+
+---
+
+## 6️⃣ 날짜 처리
+
+```python
+df["date"] = pd.to_datetime(df["date"])   # 문자열 → datetime
+
+df["year"]  = df["date"].dt.year
+df["month"] = df["date"].dt.month
+df["day"]   = df["date"].dt.day
+
+# 월별 매출 합계
+df.groupby(df["date"].dt.month)["sales"].sum()
+```
+
+---
+
+## 7️⃣ 데이터 전처리 패턴
+
+```python
+df.drop_duplicates()                    # 중복 제거
+df.drop_duplicates(subset=["name"])     # 특정 컬럼 기준
+
+df.reset_index(drop=True)              # 인덱스 재설정
+
+df.rename(columns={"name": "학생명"})   # 컬럼명 변경
+
+df["score"] = df["score"].astype(float)  # 타입 변환
+
+# 구간 나누기
+pd.cut(df["score"], bins=[0, 70, 80, 90, 100],
+       labels=["D", "C", "B", "A"])
+```
+
+---
+
 ## ✅ 오늘 주의사항
 
 ```python
 # numpy
 # 1. 배열 생성은 np.arange() 활용
-np.array([x+1 for x in range(20)])   # ❌ 불필요하게 김
-np.arange(1, 21)                      # ✅ 간결
+np.array([x+1 for x in range(20)])   # ❌
+np.arange(1, 21)                      # ✅
 
 # 2. 복합 조건은 & / | 사용
 arr[arr > 3][arr[arr > 3] < 10]      # ❌ 두 번에 나눠서
@@ -303,14 +425,21 @@ arr[(arr > 3) & (arr < 10)]          # ✅ 한 번에
 
 # pandas
 # 3. sort_values / 필터링 결과 저장 또는 출력 필수
-df.sort_values("score")              # ❌ 출력 안 됨
-print(df.sort_values("score"))       # ✅
-sorted_df = df.sort_values("score")  # ✅ 변수에 저장
+df.sort_values("score")               # ❌ 출력 안 됨
+print(df.sort_values("score"))        # ✅
 
-# 4. 상위 N명 이름만 출력
-df.sort_values("score", ascending=False).head(3)["name"].values  # ✅
+# 4. dept 별 평균 vs 전체 평균 비교
+dept_mean = df.groupby("dept")["score"].mean()
+dept_mean[dept_mean > df["score"].mean()].index.tolist()  # ✅
 
-# 5. inplace=True — 원본 직접 수정
-df.drop("col", axis=1)              # 원본 유지
-df.drop("col", axis=1, inplace=True) # 원본 수정
+# 5. 결측치 확인
+left_join[left_join["score"].isnull()]["name"]   # isnull() 로 NaN 찾기
+
+# 6. apply axis 기준
+df["col"].apply(lambda x: ...)              # 단일 컬럼 — axis 불필요
+df.apply(lambda row: ..., axis=1)           # 여러 컬럼 동시 — axis=1 필수
+
+# 7. inplace=True — 원본 직접 수정
+df.drop("col", axis=1)                # 원본 유지
+df.drop("col", axis=1, inplace=True)  # 원본 수정
 ```
