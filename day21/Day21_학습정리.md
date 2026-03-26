@@ -1,4 +1,4 @@
-# 📚 Day 21 파이썬 심화 — matplotlib / seaborn + 데이터 분석 프로젝트
+# 📚 Day 21 파이썬 심화 — matplotlib/seaborn + 데이터 분석 + 웹 크롤링
 
 ---
 
@@ -9,8 +9,6 @@
 ```python
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
-import pandas as pd
 
 # 한글 폰트 설정 (Windows)
 plt.rcParams["font.family"] = "Malgun Gothic"
@@ -26,17 +24,14 @@ plt.rcParams["axes.unicode_minus"] = False   # 마이너스 기호 깨짐 방지
 plt.plot(x, y, color="blue", linewidth=2, linestyle="--", marker="o")
 
 # 산점도 — 분포
-plt.scatter(x, y, color="red", s=100)   # s = 점 크기
+plt.scatter(x, y, color="red", s=100)
 
 # 막대 그래프 — 비교
 plt.bar(categories, values, color="skyblue")
+plt.barh(categories, values)   # 수평
 
-# 수평 막대 그래프
-plt.barh(categories, values)
-
-# 히스토그램 — 분포
-plt.hist(data, bins=30, color="green", edgecolor="black")
-# bins 는 데이터 수에 맞게 조정 (너무 크면 의미없음)
+# 히스토그램 — 분포 (bins 는 데이터 수에 맞게)
+plt.hist(data, bins=10, color="green", edgecolor="black")
 
 # 파이 차트 — 비율
 plt.pie(sizes, labels=labels, autopct="%1.1f%%")
@@ -47,17 +42,13 @@ plt.pie(sizes, labels=labels, autopct="%1.1f%%")
 ## 3️⃣ 그래프 꾸미기
 
 ```python
-plt.figure(figsize=(10, 6))   # 그래프 크기
-
-plt.plot(x, y1, label="데이터1")
-plt.plot(x, y2, label="데이터2")
-
+plt.figure(figsize=(10, 6))
 plt.title("제목", fontsize=16)
-plt.xlabel("x축", fontsize=12)
-plt.ylabel("y축", fontsize=12)
-plt.legend()          # 범례
-plt.grid(True)        # 격자
-plt.tight_layout()    # 레이아웃 자동 조정
+plt.xlabel("x축")
+plt.ylabel("y축")
+plt.legend()        # 범례
+plt.grid(True)      # 격자
+plt.tight_layout()  # 레이아웃 자동 조정
 plt.show()
 ```
 
@@ -66,19 +57,16 @@ plt.show()
 ## 4️⃣ subplot — 여러 그래프 한 번에
 
 ```python
-# 1행 2열
+# 1행 2열 → 1차원 배열
 fig, axes = plt.subplots(1, 2, figsize=(10, 6))
-# axes = [ax1, ax2] ← 1차원 배열
 axes[0].plot(x, y)
 axes[1].bar(x, y)
 
-# 2행 2열
-fig, axes = plt.subplots(2, 2, figsize=(12, 8))
-# axes = [[ax1, ax2], [ax3, ax4]] ← 2차원 배열
+# 2행 3열 → 2차원 배열
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 axes[0, 0].plot(x, y)
 axes[0, 1].scatter(x, y)
 axes[1, 0].bar(x, y)
-axes[1, 1].hist(data)
 
 plt.tight_layout()
 plt.show()
@@ -90,24 +78,13 @@ plt.show()
 
 ```python
 # seaborn 은 matplotlib 위에서 동작
-# 그래프 그리기 → seaborn
-# 꾸미기 / 출력 → matplotlib
+# 그리기 → seaborn / 꾸미기·출력 → matplotlib
 
-# 막대 그래프
-sns.barplot(data=df, x="dept", y="score")
-plt.title("부서별 점수")
-plt.show()
+sns.barplot(data=df, x="dept", y="score")        # 막대
+sns.boxplot(data=df, x="dept", y="score")         # 박스플롯
+sns.heatmap(corr, annot=True, cmap="coolwarm")    # 히트맵
 
-# 박스 플롯 — 분포 확인
-sns.boxplot(data=df, x="dept", y="score")
-plt.show()
-
-# 히트맵 — 상관관계 시각화
-corr = df[["korean", "math", "english"]].corr()
-sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f")
-plt.show()
-
-# subplot 과 같이 쓸 때
+# subplot 과 같이 쓸 때 ax 지정
 fig, axes = plt.subplots(1, 2)
 sns.barplot(data=df, x="dept", y="score", ax=axes[0])
 sns.boxplot(data=df, x="dept", y="score", ax=axes[1])
@@ -119,61 +96,36 @@ plt.show()
 ## 6️⃣ corr() — 상관관계
 
 ```python
-# 두 컬럼 간의 상관관계를 -1 ~ 1 로 나타냄
-# 1  → 양의 상관관계 (같이 증가)
-# -1 → 음의 상관관계 (반대로 움직임)
-# 0  → 상관관계 없음
+# -1 ~ 1 사이 값
+# 1  → 양의 상관관계 / -1 → 음의 상관관계 / 0 → 없음
 
 corr = df[["korean", "math", "english"]].corr()
-#          korean  math  english
-# korean     1.00  0.23     0.15
-# math       0.23  1.00     0.31
-# english    0.15  0.31     1.00
-
-# 컬럼 1개면 자기 자신과 1.0 만 나옴 (의미 없음)
-# 컬럼 여러 개일 때 의미있음
-```
-
----
-
-## 7️⃣ pandas 에서 바로 시각화
-
-```python
-df["score"].plot(kind="bar")
-df["score"].plot(kind="hist", bins=10)
-df["score"].plot(kind="line")
+sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f")
 plt.show()
+
+# 컬럼 1개 → 자기 자신과 1.0 만 나옴 (의미 없음)
+# 컬럼 여러 개일 때 의미있음
 ```
 
 ---
 
 # 2부 — 데이터 분석 프로젝트
 
-## 프로젝트 구조
-
-```
-data_analysis/
-├── data.csv       ← 데이터
-└── analysis.py    ← 분석 코드
-```
-
 ## 전체 분석 흐름
 
 ```
 0단계 — 데이터 생성
-1단계 — 데이터 불러오기 + 기본 확인
-2단계 — 데이터 전처리
+1단계 — 불러오기 + 기본 확인
+2단계 — 전처리
 3단계 — 기초 통계 분석
 4단계 — 시각화
 5단계 — 상관관계 분석
 ```
 
----
-
 ## 0단계 — 데이터 생성
 
 ```python
-np.random.seed(42)   # 재현 가능한 랜덤값
+np.random.seed(42)
 data = {
     "name":    [f"학생{i}" for i in range(1, 21)],
     "korean":  np.random.randint(60, 100, 20),
@@ -185,118 +137,70 @@ df = pd.DataFrame(data)
 df.to_csv("data.csv", index=False, encoding="utf-8-sig")
 ```
 
----
-
-## 1단계 — 데이터 불러오기 + 기본 확인
+## 1단계 — 불러오기 + 기본 확인
 
 ```python
 df = pd.read_csv("data.csv", encoding="utf-8-sig")
-
-df.shape           # 행, 열 수
-df.head()          # 상위 5행
-df.info()          # 데이터 타입
-df.describe()      # 기초 통계
-df.isnull().sum()  # 결측치 확인
+df.shape / df.head() / df.info() / df.describe() / df.isnull().sum()
 ```
 
----
-
-## 2단계 — 데이터 전처리
+## 2단계 — 전처리
 
 ```python
-# 총점 / 평균 컬럼 추가
 df["total"]   = df["korean"] + df["math"] + df["english"]
 df["average"] = df["total"] / 3
-
-# 등급 컬럼 추가
-df["grade"] = df["average"].apply(lambda x:
-    "A" if x >= 90 else
-    "B" if x >= 80 else
-    "C" if x >= 70 else
-    "D"
-)
+df["grade"]   = df["average"].apply(lambda x:
+    "A" if x >= 90 else "B" if x >= 80 else "C" if x >= 70 else "D")
 ```
 
----
-
-## 3단계 — 기초 통계 분석
+## 3단계 — 기초 통계
 
 ```python
-# 과목별 통계
 df[["korean", "math", "english"]].describe()
-
-# 부서별 평균
 df.groupby("dept")[["korean", "math", "english", "average"]].mean().round(1)
-
-# 등급 분포
 df["grade"].value_counts().sort_index()
 ```
-
----
 
 ## 4단계 — 시각화
 
 ```python
 fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 
-# 과목별 평균 막대 그래프
+# 과목별 평균
 subject_means = df[["korean", "math", "english"]].mean()
 axes[0, 0].bar(subject_means.index, subject_means.values,
                color=["skyblue", "salmon", "lightgreen"])
-axes[0, 0].set_title("과목별 평균")
 
-# 평균 점수 분포 히스토그램
+# 평균 점수 분포
 axes[0, 1].hist(df["average"], bins=10, color="purple", edgecolor="black")
-axes[0, 1].set_title("평균 점수 분포")
 
-# 부서별 평균 점수
+# 부서별 평균
 sns.barplot(data=df, x="dept", y="average", ax=axes[0, 2])
-axes[0, 2].set_title("부서별 평균 점수")
 
 # 등급 분포 파이 차트
 grade_counts = df["grade"].value_counts().sort_index()
 axes[1, 0].pie(grade_counts, labels=grade_counts.index, autopct="%1.1f%%")
-axes[1, 0].set_title("등급 분포")
 
-# 국어 vs 수학 산점도
+# 산점도
 axes[1, 1].scatter(df["korean"], df["math"], alpha=0.6)
-axes[1, 1].set_xlabel("국어")
-axes[1, 1].set_ylabel("수학")
-axes[1, 1].set_title("국어 vs 수학")
 
 # 부서별 boxplot
 sns.boxplot(data=df, x="dept", y="average", ax=axes[1, 2])
-axes[1, 2].set_title("부서별 점수 분포")
 
 plt.tight_layout()
 plt.show()
 ```
 
----
-
-## 5단계 — 상관관계 분석
-
-```python
-corr = df[["korean", "math", "english"]].corr()
-plt.figure(figsize=(6, 4))
-sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f")
-plt.title("과목 간 상관관계")
-plt.show()
-```
-
----
-
 ## 추가 분석 패턴
 
 ```python
-# 수학 점수 상위 5명
+# 상위 5명
 df.sort_values("math", ascending=False)[["name", "math"]].head(5)
 
-# 부서별 A등급 학생 수
-df[df["grade"] == "A"]["dept"].value_counts()   # ✅ 간결
-df[df["grade"] == "A"].groupby("dept").size()   # ✅ 동일
+# 부서별 A등급 수
+df[df["grade"] == "A"]["dept"].value_counts()
 
-# 세 과목 모두 80점 이상인 학생 이름
+# 세 과목 모두 80점 이상
 df["name"][
     (df["korean"] >= 80) &
     (df["math"] >= 80) &
@@ -306,27 +210,171 @@ df["name"][
 
 ---
 
+# 3부 — 웹 크롤링
+
+## 1️⃣ 웹 크롤링이란?
+
+```
+웹 페이지에서 데이터를 자동으로 수집하는 것
+활용 — 뉴스 수집, 가격 비교, 주식 데이터 등
+```
+
+## 2️⃣ requests — 웹 페이지 가져오기
+
+```python
+import requests
+
+response = requests.get("https://books.toscrape.com")
+print(response.status_code)   # 200 → 성공
+print(response.text)          # HTML 전체
+
+# 상태 코드
+# 200 → 성공 / 404 → 없음 / 403 → 접근 거부 / 500 → 서버 에러
+```
+
+## 3️⃣ BeautifulSoup — HTML 파싱
+
+```python
+from bs4 import BeautifulSoup
+
+soup = BeautifulSoup(response.text, "html.parser")
+
+# find() — 첫 번째만
+soup.find("h2")
+soup.find("li", class_="item")
+soup.find("ul", id="list")
+
+# find_all() — 전부
+soup.find_all("li")
+
+# 텍스트 / 속성 추출
+soup.find("h2").text
+soup.find("a").get("href")   # get() 이 더 안전
+
+# select() — CSS 선택자
+soup.select(".item")          # class
+soup.select("#list li")       # 중첩
+soup.select_one(".item")      # 첫 번째만
+```
+
+## 4️⃣ find() vs select()
+
+```python
+# 단순한 구조 → find()
+soup.find("li", class_="item")
+
+# 복잡한 구조 → select()
+soup.select("article h3 a")   # 중첩 선택자 가능
+```
+
+## 5️⃣ 실전 크롤링 패턴
+
+```python
+import time
+
+def crawl(url):
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+
+    try:
+        response = requests.get(url, headers=headers, timeout=5)
+        if response.status_code != 200:
+            return None
+        soup = BeautifulSoup(response.text, "html.parser")
+        return soup
+
+    except requests.exceptions.Timeout:
+        print("타임아웃 발생")
+    except Exception as e:
+        print(f"에러: {e}")
+```
+
+## 6️⃣ 페이지네이션
+
+```python
+def crawl_all_pages(max_page=3):
+    all_data = []
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    for page in range(1, max_page + 1):
+        url = f"https://books.toscrape.com/catalogue/page-{page}.html"
+        try:
+            response = requests.get(url, headers=headers, timeout=5)
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            for item in soup.select(".product_pod"):
+                all_data.append({
+                    "title":  item.select_one("h3 a").get("title"),
+                    "price":  item.select_one(".price_color").get_text().strip(),
+                    "rating": item.select_one("p")["class"][1]
+                })
+
+            print(f"{page}페이지 완료")
+            time.sleep(1)   # 딜레이 필수
+
+        except Exception as e:
+            print(f"에러: {e}")
+
+    return pd.DataFrame(all_data)
+```
+
+## 7️⃣ 데이터 정제
+
+```python
+# 가격 — 문자열 → 숫자
+df["price"] = df["price"].str.replace(r"[^0-9.]", "", regex=True).astype(float)
+# 또는
+df["price"] = df["price"].str.replace("£", "").astype(float)
+
+# 별점 — 영어 → 숫자
+rating_map = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5}
+df["rating"] = df["rating"].map(rating_map)
+```
+
+## 8️⃣ 크롤링 → 분석 → 시각화 연결
+
+```python
+# 별점별 평균 가격
+rating_price = df.groupby("rating")["price"].mean()
+plt.bar(rating_price.index, rating_price.values)
+plt.title("별점별 평균 가격")
+plt.show()
+```
+
+## 9️⃣ CSV 저장
+
+```python
+df.to_csv("result.csv", index=False, encoding="utf-8-sig")
+# utf-8-sig → 한글 깨짐 방지
+```
+
+---
+
 ## ✅ 오늘 주의사항
 
 ```python
 # 1. seaborn 출력은 plt.show()
 sns.barplot(...)
-plt.show()   # seaborn 도 plt.show() 로 출력
+plt.show()   # ✅
 
 # 2. subplot 차원 주의
-plt.subplots(1, 2) → axes[0], axes[1]          # 1차원
-plt.subplots(2, 2) → axes[0, 0], axes[0, 1]    # 2차원
+plt.subplots(1, 2) → axes[0]        # 1차원
+plt.subplots(2, 2) → axes[0, 0]     # 2차원
 
-# 3. seaborn + subplot 같이 쓸 때 ax 지정
-sns.barplot(data=df, x="dept", y="score", ax=axes[0, 2])
+# 3. 딕셔너리 키는 고정값으로
+{"title": ..., "link": ...}          # ✅ 나중에 DataFrame 변환 편함
+{element.text: element.get("href")}  # ❌ 키가 동적 → 접근 불편
 
-# 4. bins 는 데이터 수에 맞게
-plt.hist(data, bins=5)    # 데이터 적을 때
-plt.hist(data, bins=30)   # 데이터 많을 때
+# 4. CSS 선택자로 간결하게
+for a in soup.find_all("a"):
+    if a.has_attr("title"):          # ❌ 조건문 필요
+item.select_one("h3 a").get("title") # ✅ 바로 접근
 
-# 5. 이름만 출력할 때 .values 추가
-df["name"][조건].values   # 인덱스 없이 깔끔하게
+# 5. 가격 변환 — 정규표현식이 더 범용적
+df["price"].str.replace("£", "")              # £ 만 처리
+df["price"].str.replace(r"[^0-9.]", "", regex=True)  # 모든 기호 처리 ✅
 
-# 6. CSV 저장 시 한글 깨짐 방지
-df.to_csv("data.csv", encoding="utf-8-sig")   # utf-8-sig ✅
+# 6. 크롤링 주의사항
+# robots.txt 확인 → Disallow 경로 크롤링 금지
+# time.sleep() → 서버 부하 방지 필수
+# 개인정보 수집 금지
 ```
